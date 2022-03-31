@@ -2,3 +2,4 @@
 scraper/env.py
 __pycache__
 scraper/data/output
+scraper/data/backup

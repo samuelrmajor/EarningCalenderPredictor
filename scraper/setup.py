@@ -15,7 +15,6 @@ if check == "Y":
 
     url = base + ticker + end
     url2 = base2+ticker+end2
-    print(url2)
     r = requests.get(url)
     r2 = requests.get(url2)
     data = r.json()["quarterlyEarnings"]
@@ -23,11 +22,10 @@ if check == "Y":
 
     df = pd.DataFrame.from_records(data)
     df['symbol'] = ticker
-    df['dayBeforeEndPrice'] = "test"
-    df['dayAfterEndPrice'] = "test"
-    df['dayBeforeVolume'] = "test"
-    df['dayAfterVolume'] = "test"
-    df = df.reset_index()
+    df['dayBeforeEndPrice'] = 0
+    df['dayAfterEndPrice'] = 0
+    df['dayBeforeVolume'] = 0
+    df['dayAfterVolume'] = 0
     validDates = data2.keys()
     for index, row in df.iterrows():
         dateRelease = datetime.datetime.strptime(
@@ -41,12 +39,11 @@ if check == "Y":
                 dateBefore = str(
                     dateRelease - datetime.timedelta(days=counterSuccDateBefore))[0:10]
                 succesfulDateBefore = True
-                print(dateBefore)
                 dayBeforeEndPrice = data2[dateBefore]["4. close"]
                 dayBeforeEndVolume = data2[dateBefore]["5. volume"]
         if not(succesfulDateBefore):
-            dayBeforeEndPrice = "NAN"
-            dayBeforeEndVolume = "NAN"
+            dayBeforeEndPrice = -1
+            dayBeforeEndVolume = -1
         # Ensures day after is a business day
         succesfulDateAfter = False
         counterSuccDateAfter = 0
@@ -59,22 +56,19 @@ if check == "Y":
                 dayAfterEndPrice = data2[dateAfter]["4. close"]
                 dayAfterEndVolume = data2[dateAfter]["5. volume"]
         if not(succesfulDateAfter):
-            dayAfterEndPrice = "NAN"
-            dayAfterEndVolume = "NAN"
+            dayAfterEndPrice = -1
+            dayAfterEndVolume = -1
         dateRelease = str(dateRelease)[0:10]
 
         df.iat[index, df.columns.get_loc(
-            'dayBeforeEndPrice')] = dayBeforeEndPrice
+            'dayBeforeEndPrice')] = float(dayBeforeEndPrice)
         df.iat[index, df.columns.get_loc(
-            'dayBeforeVolume')] = dayBeforeEndVolume
+            'dayBeforeVolume')] = float(dayBeforeEndVolume)
         df.iat[index, df.columns.get_loc(
-            'dayAfterEndPrice')] = dayAfterEndPrice
+            'dayAfterEndPrice')] = float(dayAfterEndPrice)
         df.iat[index, df.columns.get_loc(
-            'dayAfterVolume')] = dayAfterEndVolume
+            'dayAfterVolume')] = float(dayAfterEndVolume)
 
-    print(df)
-    # df2 = pd.DataFrame.from_records(data2)
-
-    # df.to_csv("data/output/historicEarningsAndPrices.csv", index=False)
+    df.to_csv("data/output/historicEarningsAndPrices.csv", index=False)
 else:
     print("Setup Aborted")
